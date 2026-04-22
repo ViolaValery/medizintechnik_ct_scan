@@ -20,14 +20,9 @@ public:
 private:
     Ui::Widget *ui;
 
+    int getIndex(int x, int y);
+
 private slots:
-    void MalePixel();
-    void horizontalRed();
-    void cross();
-    void linearBlue();
-    void allRed();
-    void quadrat();
-    void transient();
-    void circle();
+    void load_image();
 };
 #endif // WIDGET_H
