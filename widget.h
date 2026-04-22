@@ -20,9 +20,13 @@ public:
 private:
     Ui::Widget *ui;
 
+    short* m_pIMageData;
+
     int getIndex(int x, int y);
+    int windowing(int HU_value, int center, int width);
 
 private slots:
     void load_image();
+    void load_12bitimage();
 };
 #endif // WIDGET_H

@@ -32,14 +32,27 @@
   <widget class="QPushButton" name="pushButton_pixel">
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>550</y>
+     <x>220</x>
+     <y>560</y>
      <width>121</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>PIXEL</string>
+    <string>Load 8bit</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_load12bit">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>560</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Load 12bit</string>
    </property>
   </widget>
  </widget>
