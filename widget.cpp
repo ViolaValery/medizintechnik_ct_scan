@@ -4,12 +4,25 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QPainter>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+
+    // Placeholder image
+    QImage placeholder(512, 512, QImage::Format_RGB32);
+    placeholder.fill(qRgb(30, 30, 30));
+
+    QPainter painter(&placeholder);
+    painter.setPen(QPen(QColor(180, 180, 180)));
+    painter.setFont(QFont("Courier New", 36, QFont::Bold));
+    painter.drawText(placeholder.rect(), Qt::AlignCenter, "NO IMAGE");
+    painter.end();
+
+    ui->label_image->setPixmap(QPixmap::fromImage(placeholder));
 
     // Aufgabe 2.1
     connect(ui->pushButton_pixel, SIGNAL(clicked()), this, SLOT(load_image()));
@@ -95,7 +108,7 @@ void Widget::load_12bitimage(){
     for(int i = 0; i<511; i++){
         for(int j = 0; j<511; j++){
             //int index = getIndex(i, j);
-            int iGrauwert = windowing(m_pIMageData[getIndex(i, j)], 0, 800);
+            int iGrauwert = windowing(m_pIMageData[getIndex(i, j)], 600, 1200);
             image.setPixel(i,j,qRgb(iGrauwert, iGrauwert, iGrauwert));
         }
     }
