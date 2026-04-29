@@ -20,16 +20,16 @@ public:
 private:
     Ui::Widget *ui;
 
-    short* m_pIMageData;
+    short* m_pImageData3d;
 
     int getIndex(int x, int y);
     int windowing(int HU_value, int center, int width, int &greyValue);
     void updateSliceView();
 
 private slots:
-    void load_image();
-    void load_12bitimage();
+    void load_3d();
     void updatedWindowingCenter(int center);
     void updatedWindowingWidth(int width);
+    void updatedLayer(int layer);
 };
 #endif // WIDGET_H

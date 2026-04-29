@@ -25,80 +25,22 @@ Widget::Widget(QWidget *parent)
 
     ui->label_image->setPixmap(QPixmap::fromImage(placeholder));
 
-    // Aufgabe 2.1
-    connect(ui->pushButton_pixel, SIGNAL(clicked()), this, SLOT(load_image()));
-
-    // Aufgabe 2.2
-    m_pIMageData = new short[512*512];
-    connect(ui->pushButton_load12bit, SIGNAL(clicked()), this, SLOT(load_12bitimage()));
-
     // Aufgabe 3.1
     connect(ui->horizontalSlider_center, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingCenter(int)));
     connect(ui->horizontalSlider_width, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingWidth(int)));
+
+    // Aufgabe 3.2
+    m_pImageData3d = new short[512*512*130];
+
+    // Aufgabe 3.3
+    connect(ui->pushButton_3d, SIGNAL(clicked()), this, SLOT(load_3d()));
+    connect(ui->verticalSlider_layers, SIGNAL(valueChanged(int)), this, SLOT(updatedLayer(int)));
 }
 
 Widget::~Widget()
 {
     delete ui;
-    delete[] m_pIMageData;
-}
-
-void Widget::load_image(){
-    QString imagePath = QFileDialog::getOpenFileName(this, "Please provide the image", "./",
-                                                     "Raw Image Files (*.raw)");
-    QFile dataFile(imagePath);
-
-    char imageData[512*512];
-
-    // Open the file with openMode ReadOnly and compare
-    if (!dataFile.open(QIODevice::ReadOnly))
-    {
-        QMessageBox::critical(this, "Error", "Data could not be read.");
-        return;
-    }
-
-    // Load data into a temporary 8-bit buffer to ensure that it is displayed correctly
-    unsigned char tempData[512 * 512];
-
-    if (!(dataFile.size() == dataFile.read((char*)tempData, 512*512*sizeof(unsigned char))))
-    {
-        QMessageBox::critical(this, "Error", "Raw data not equal to read data.");
-        return;
-    }
-
-    //dataFile.read(imageData, 512*512);
-    dataFile.close();
-
-    // Copy 8-bit values (0-255) into short array
-    for(int i = 0; i < 512 * 512; i++){
-        m_pIMageData[i] = (short)tempData[i];
-    }
-
-    updateSliceView();
-}
-
-void Widget::load_12bitimage(){
-    QString imagePath = QFileDialog::getOpenFileName(this, "Please provide the 12 bit image", "./",
-                                                     "Raw Image Files (*.raw)");
-    QFile dataFile(imagePath);
-
-    // Open the file with openMode ReadOnly and compare
-    if (!dataFile.open(QIODevice::ReadOnly))
-    {
-        QMessageBox::critical(this, "Error", "Data could not be read.");
-        return;
-    }
-
-    if (!(dataFile.size() == dataFile.read((char*)m_pIMageData, 512*512*sizeof(short))))
-    {
-        QMessageBox::critical(this, "Error", "Raw data not equal to read data.");
-        return;
-    }
-
-    //dataFile.read(imageData, 512*512);
-    dataFile.close();
-
-    updateSliceView();
+    delete[] m_pImageData3d;
 }
 
 int Widget::windowing(int HU_value, int center, int width, int &igreyValue){
@@ -135,6 +77,11 @@ void Widget::updatedWindowingWidth(int value)
     updateSliceView();
 }
 
+void Widget::updatedLayer(int value)
+{
+    updateSliceView();
+}
+
 void Widget::updateSliceView(){
 
     QElapsedTimer timer;
@@ -148,12 +95,18 @@ void Widget::updateSliceView(){
 
     int igreyValue;
     int index;
+    int layer = ui->verticalSlider_layers->value(); // 3d images
+    if(layer > 130){
+        qDebug() << "Error: Layer slider was set too high (>130).";
+        return;
+    }
     // Read and set greyscale value of index at position x, y in image
-    //y*512+x
     for(int j = 0; j<511; j++){
-        index = j*512;
+        // For every layer add number of pixels to index
+        // index = j*512, number of pixels for every layer = 512*512*layer
+        index = j*512 + 512*512*layer;
         for(int i = 0; i<511; i++){
-            windowing(m_pIMageData[index+i], center, width, igreyValue);
+            windowing(m_pImageData3d[index+i], center, width, igreyValue);
             image.setPixel(i,j,qRgb(igreyValue, igreyValue, igreyValue));
         }
     }
@@ -162,4 +115,28 @@ void Widget::updateSliceView(){
     ui->label_image->setPixmap(QPixmap::fromImage(image));
 
     qDebug() << "Elapsed time: " << timer.nsecsElapsed();
+}
+
+void Widget::load_3d(){
+    QString imagePath = QFileDialog::getOpenFileName(this, "Please provide the 12 bit image", "./",
+                                                     "Raw Image Files (*.raw)");
+    QFile dataFile(imagePath);
+
+    // Open the file with openMode ReadOnly and compare
+    if (!dataFile.open(QIODevice::ReadOnly))
+    {
+        QMessageBox::critical(this, "Error", "Data could not be read.");
+        return;
+    }
+
+    if (!(dataFile.size() == dataFile.read((char*)m_pImageData3d, 512*512*130*sizeof(short))))
+    {
+        QMessageBox::critical(this, "Error", "Raw data not equal to read data.");
+        return;
+    }
+
+    //dataFile.read(imageData, 512*512);
+    dataFile.close();
+
+    updateSliceView();
 }

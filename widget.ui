@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
-    <height>604</height>
+    <width>526</width>
+    <height>652</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@ QPushButton:pressed {
   <widget class="QLabel" name="label_image">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>10</x>
      <y>0</y>
      <width>512</width>
      <height>512</height>
@@ -55,39 +55,13 @@ QPushButton:pressed {
     <string>Width value: 800</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_pixel">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>560</y>
-     <width>121</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Load 8bit</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_load12bit">
-   <property name="geometry">
-    <rect>
-     <x>290</x>
-     <y>560</y>
-     <width>121</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Load 12bit</string>
-   </property>
-  </widget>
   <widget class="QSlider" name="horizontalSlider_width">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>530</y>
-     <width>160</width>
-     <height>22</height>
+     <x>390</x>
+     <y>550</y>
+     <width>111</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="minimum">
@@ -106,10 +80,10 @@ QPushButton:pressed {
   <widget class="QSlider" name="horizontalSlider_center">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>530</y>
-     <width>160</width>
-     <height>22</height>
+     <x>390</x>
+     <y>610</y>
+     <width>111</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="minimum">
@@ -125,9 +99,9 @@ QPushButton:pressed {
   <widget class="QLabel" name="label_center">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>520</y>
-     <width>49</width>
+     <x>410</x>
+     <y>590</y>
+     <width>91</width>
      <height>16</height>
     </rect>
    </property>
@@ -138,14 +112,43 @@ QPushButton:pressed {
   <widget class="QLabel" name="label_width">
    <property name="geometry">
     <rect>
-     <x>350</x>
-     <y>520</y>
-     <width>49</width>
+     <x>410</x>
+     <y>530</y>
+     <width>81</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
     <string>TextLabel</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_3d">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>510</y>
+     <width>201</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Load 3D</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="verticalSlider_layers">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>520</y>
+     <width>21</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>129</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Orientation::Vertical</enum>
    </property>
   </widget>
  </widget>
