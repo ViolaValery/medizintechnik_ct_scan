@@ -23,10 +23,13 @@ private:
     short* m_pIMageData;
 
     int getIndex(int x, int y);
-    int windowing(int HU_value, int center, int width);
+    int windowing(int HU_value, int center, int width, int &greyValue);
+    void updateSliceView();
 
 private slots:
     void load_image();
     void load_12bitimage();
+    void updatedWindowingCenter(int center);
+    void updatedWindowingWidth(int width);
 };
 #endif // WIDGET_H
