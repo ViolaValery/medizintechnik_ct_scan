@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QElapsedTimer>
+#include <QDirIterator>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -13,17 +14,24 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    //---------------------------------------------------------------------
+    // ------------------------- Style ------------------------------------
+    this->setAttribute(Qt::WA_StyledBackground, true);
+
     // Placeholder image
     QImage placeholder(512, 512, QImage::Format_RGB32);
-    placeholder.fill(qRgb(30, 30, 30));
+    placeholder.fill(qRgb(13, 11, 21));
 
     QPainter painter(&placeholder);
-    painter.setPen(QPen(QColor(180, 180, 180)));
+    painter.setPen(QPen(QColor(100, 60, 140)));
     painter.setFont(QFont("Courier New", 36, QFont::Bold));
     painter.drawText(placeholder.rect(), Qt::AlignCenter, "NO IMAGE");
     painter.end();
 
     ui->label_image->setPixmap(QPixmap::fromImage(placeholder));
+    // ------------------------- Style ------------------------------------
+    //---------------------------------------------------------------------
+
 
     // Aufgabe 3.1
     connect(ui->horizontalSlider_center, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingCenter(int)));
@@ -96,16 +104,16 @@ void Widget::updateSliceView(){
     int igreyValue;
     int index;
     int layer = ui->verticalSlider_layers->value(); // 3d images
-    if(layer > 130){
+    if(layer >= 130){
         qDebug() << "Error: Layer slider was set too high (>130).";
         return;
     }
     // Read and set greyscale value of index at position x, y in image
-    for(int j = 0; j<511; j++){
+    for(int j = 0; j<512; j++){
         // For every layer add number of pixels to index
         // index = j*512, number of pixels for every layer = 512*512*layer
-        index = j*512 + 512*512*layer;
-        for(int i = 0; i<511; i++){
+        index = layer*512*512 + j*512;
+        for(int i = 0; i<512; i++){
             windowing(m_pImageData3d[index+i], center, width, igreyValue);
             image.setPixel(i,j,qRgb(igreyValue, igreyValue, igreyValue));
         }

@@ -11,6 +11,13 @@ qt_add_executable(Aufgabe1
     widget.cpp
     widget.h
     widget.ui
+    style.qrc
+)
+
+qt_add_resources(Aufgabe1 "resources"
+    PREFIX "/"
+    FILES
+        style.qss
 )
 
 qt_add_translations(
