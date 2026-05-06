@@ -30,6 +30,7 @@ Widget::Widget(QWidget *parent)
     painter.end();
 
     ui->label_image->setPixmap(QPixmap::fromImage(placeholder));
+    ui->label_depthBuffer->setPixmap(QPixmap::fromImage(placeholder));
     // ------------------------- Style ------------------------------------
     //---------------------------------------------------------------------
 
@@ -43,6 +44,11 @@ Widget::Widget(QWidget *parent)
     connect(ui->verticalSlider_layers, SIGNAL(valueChanged(int)), this, SLOT(updatedLayer(int)));
     connect(ui->horizontalSlider_threshold, SIGNAL(valueChanged(int)), this, SLOT(updatedThreshold(int)));
     connect(ui->pushButton_render3d, SIGNAL(clicked()), this, SLOT(onDepthBufferClicked()));
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, [this](int index){
+        if(index == 1){  // 0 = erster tab, 1 = zweiter tab
+            onDepthBufferClicked();
+        }
+    });
 }
 
 Widget::~Widget()
