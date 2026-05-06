@@ -33,16 +33,15 @@ Widget::Widget(QWidget *parent)
     //---------------------------------------------------------------------
 
 
-    // Aufgabe 3.1
     connect(ui->horizontalSlider_center, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingCenter(int)));
     connect(ui->horizontalSlider_width, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingWidth(int)));
+    connect(ui->horizontalSlider_threshold, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingThreshold(int)));
 
-    // Aufgabe 3.2
     m_pImageData3d = new short[512*512*130];
 
-    // Aufgabe 3.3
     connect(ui->pushButton_3d, SIGNAL(clicked()), this, SLOT(load_3d()));
     connect(ui->verticalSlider_layers, SIGNAL(valueChanged(int)), this, SLOT(updatedLayer(int)));
+    connect(ui->horizontalSlider_threshold, SIGNAL(valueChanged(int)), this, SLOT(updatedThreshold(int)));
 }
 
 Widget::~Widget()
@@ -57,6 +56,8 @@ int Widget::windowing(int HU_value, int center, int width, int &igreyValue){
 
     if(HU_value < low_end_window){
         igreyValue = 0.0;
+    }else if(HU_value > ui->horizontalSlider_threshold->value()){
+        return 50; // not pretty
     }else if(HU_value > high_end_window){
         igreyValue = 255.0;
     }else{
@@ -64,7 +65,6 @@ int Widget::windowing(int HU_value, int center, int width, int &igreyValue){
         // -1024 bis +3071 auf 0 bis 255
         igreyValue = ((HU_value - low_end_window) / (double)width * 255.0);
     }
-
     return 0;
 }
 
@@ -82,6 +82,12 @@ void Widget::updatedWindowingCenter(int value)
 void Widget::updatedWindowingWidth(int value)
 {
     ui->label_width->setText("Width value: " + QString::number(value));
+    updateSliceView();
+}
+
+void Widget::updatedThreshold(int value)
+{
+    ui->label_threshold->setText("Threshold: " + QString::number(value));
     updateSliceView();
 }
 
@@ -114,8 +120,12 @@ void Widget::updateSliceView(){
         // index = j*512, number of pixels for every layer = 512*512*layer
         index = layer*512*512 + j*512;
         for(int i = 0; i<512; i++){
-            windowing(m_pImageData3d[index+i], center, width, igreyValue);
-            image.setPixel(i,j,qRgb(igreyValue, igreyValue, igreyValue));
+            int r = windowing(m_pImageData3d[index+i], center, width, igreyValue);
+            if(r == 50){
+                image.setPixel(i,j,qRgb(255.0, 0.0, 0.0));
+            }else{
+                image.setPixel(i,j,qRgb(igreyValue, igreyValue, igreyValue));
+            }
         }
     }
 

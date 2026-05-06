@@ -30,6 +30,7 @@ private slots:
     void load_3d();
     void updatedWindowingCenter(int center);
     void updatedWindowingWidth(int width);
+    void updatedThreshold(int width);
     void updatedLayer(int layer);
 };
 #endif // WIDGET_H
