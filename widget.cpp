@@ -32,16 +32,16 @@ Widget::Widget(QWidget *parent)
     // ------------------------- Style ------------------------------------
     //---------------------------------------------------------------------
 
+    m_pImageData3d = new short[512*512*130];
+    m_ptiefenkarte = new short[512*512];
 
     connect(ui->horizontalSlider_center, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingCenter(int)));
     connect(ui->horizontalSlider_width, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingWidth(int)));
     connect(ui->horizontalSlider_threshold, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingThreshold(int)));
-
-    m_pImageData3d = new short[512*512*130];
-
     connect(ui->pushButton_3d, SIGNAL(clicked()), this, SLOT(load_3d()));
     connect(ui->verticalSlider_layers, SIGNAL(valueChanged(int)), this, SLOT(updatedLayer(int)));
     connect(ui->horizontalSlider_threshold, SIGNAL(valueChanged(int)), this, SLOT(updatedThreshold(int)));
+    connect(ui->pushButton_depthBuffer, SIGNAL(clicked()), this, SLOT(onDepthBufferClicked()));
 }
 
 Widget::~Widget()
@@ -76,32 +76,37 @@ int Widget::windowing(int HU_value, int center, int width, int &igreyValue){
 void Widget::updatedWindowingCenter(int value)
 {
     ui->label_center->setText("Center value: " + QString::number(value));
-    updateSliceView();
+    QImage image(512, 512, QImage::Format_RGB32);
+    updateSliceView(image, m_pImageData3d);
+    ui->label_image->setPixmap(QPixmap::fromImage(image));
 }
 
 void Widget::updatedWindowingWidth(int value)
 {
     ui->label_width->setText("Width value: " + QString::number(value));
-    updateSliceView();
+    QImage image(512, 512, QImage::Format_RGB32);
+    updateSliceView(image, m_pImageData3d);
+    ui->label_image->setPixmap(QPixmap::fromImage(image));
 }
 
 void Widget::updatedThreshold(int value)
 {
     ui->label_threshold->setText("Threshold: " + QString::number(value));
-    updateSliceView();
+    QImage image(512, 512, QImage::Format_RGB32);
+    updateSliceView(image, m_pImageData3d);
+    ui->label_image->setPixmap(QPixmap::fromImage(image));
 }
 
 void Widget::updatedLayer(int value)
 {
-    updateSliceView();
+    QImage image(512, 512, QImage::Format_RGB32);
+    updateSliceView(image, m_pImageData3d);
+    ui->label_image->setPixmap(QPixmap::fromImage(image));
 }
 
-void Widget::updateSliceView(){
+void Widget::updateSliceView(QImage &image, short* imageData){
 
-    QElapsedTimer timer;
-    timer.start();
-
-    QImage image(512, 512, QImage::Format_RGB32);
+    //QImage image(512, 512, QImage::Format_RGB32);
     image.fill(qRgb(0,0,0));
 
     int center = ui->horizontalSlider_center->value();
@@ -114,13 +119,14 @@ void Widget::updateSliceView(){
         qDebug() << "Error: Layer slider was set too high (>130).";
         return;
     }
+
     // Read and set greyscale value of index at position x, y in image
-    for(int j = 0; j<512; j++){
+    for(int j = 0; j<image.height(); j++){
         // For every layer add number of pixels to index
         // index = j*512, number of pixels for every layer = 512*512*layer
-        index = layer*512*512 + j*512;
-        for(int i = 0; i<512; i++){
-            int r = windowing(m_pImageData3d[index+i], center, width, igreyValue);
+        index = layer*image.width()*image.height() + j*image.width();
+        for(int i = 0; i<image.width(); i++){
+            int r = windowing(imageData[index+i], center, width, igreyValue);
             if(r == 50){
                 image.setPixel(i,j,qRgb(255.0, 0.0, 0.0));
             }else{
@@ -128,11 +134,6 @@ void Widget::updateSliceView(){
             }
         }
     }
-
-    // Show image on user interface
-    ui->label_image->setPixmap(QPixmap::fromImage(image));
-
-    qDebug() << "Elapsed time: " << timer.nsecsElapsed();
 }
 
 void Widget::load_3d(){
@@ -156,5 +157,43 @@ void Widget::load_3d(){
     //dataFile.read(imageData, 512*512);
     dataFile.close();
 
-    updateSliceView();
+    QImage image(512, 512, QImage::Format_RGB32);
+    updateSliceView(image, m_pImageData3d);
+    ui->label_image->setPixmap(QPixmap::fromImage(image));
+}
+
+//---------------------------------------------------------------------------------------------------------
+//---------------------------------------------- Aufgabe 4.2 ----------------------------------------------
+//---------------------------------------------------------------------------------------------------------
+
+void Widget::onDepthBufferClicked(){
+    int threshold = ui->horizontalSlider_threshold->value();
+    calculateDepthBuffer(m_pImageData3d, 512, 512, 130, threshold, m_ptiefenkarte);
+    QImage image(512, 512, QImage::Format_RGB32);
+
+    for(int j = 0; j < 512; j++){
+        for(int i = 0; i < 512; i++){
+            int grey = (int)((m_ptiefenkarte[j * 512 + i] / 129.0) * 255.0);
+            grey = qBound(0, grey, 255);
+            image.setPixel(i, j, qRgb(grey, grey, grey));
+        }
+    }
+
+    ui->label_depthBuffer->setPixmap(QPixmap::fromImage(image));
+}
+
+int Widget::calculateDepthBuffer(short* inputData, int width, int height, int layers, int threshold, short* depthBuffer){
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
+            depthBuffer[j * width + i] = 0;
+
+            for(int k = 0; k < layers; k++){
+                if(inputData[k * width * height + j * width + i] >= threshold){
+                    depthBuffer[j * width + i] = k;
+                    break;
+                }
+            }
+        }
+    }
+    return 0;
 }
