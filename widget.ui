@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1157</width>
-    <height>663</height>
+    <height>721</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -201,7 +201,7 @@
     <string>TextLabel</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_depthBuffer">
+  <widget class="QPushButton" name="pushButton_render3d">
    <property name="geometry">
     <rect>
      <x>780</x>
@@ -211,7 +211,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Depth buffer</string>
+    <string>Render 3D</string>
    </property>
   </widget>
  </widget>

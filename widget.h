@@ -21,12 +21,14 @@ private:
     Ui::Widget *ui;
 
     short* m_pImageData3d;
-    short* m_ptiefenkarte;
+    short* m_pDepthMap;
+    short* m_pDepthMap_diffuse;
 
     int getIndex(int x, int y);
     int windowing(int HU_value, int center, int width, int &greyValue);
     void updateSliceView(QImage& image, short* imageData);
     int calculateDepthBuffer(short* inputData, int width, int height, int layers, int threshold, short* depthBuffer);
+    int renderDepthBuffer(const short* depthBuffer, int width, int height, short* shadedBuffer);
 
 private slots:
     void load_3d();

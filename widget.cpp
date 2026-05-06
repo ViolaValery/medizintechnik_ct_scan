@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <QElapsedTimer>
 #include <QDirIterator>
+#include <cmath>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -33,15 +34,15 @@ Widget::Widget(QWidget *parent)
     //---------------------------------------------------------------------
 
     m_pImageData3d = new short[512*512*130];
-    m_ptiefenkarte = new short[512*512];
+    m_pDepthMap = new short[512*512];
+    m_pDepthMap_diffuse = new short[512*512];
 
     connect(ui->horizontalSlider_center, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingCenter(int)));
     connect(ui->horizontalSlider_width, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingWidth(int)));
-    connect(ui->horizontalSlider_threshold, SIGNAL(valueChanged(int)), this, SLOT(updatedWindowingThreshold(int)));
     connect(ui->pushButton_3d, SIGNAL(clicked()), this, SLOT(load_3d()));
     connect(ui->verticalSlider_layers, SIGNAL(valueChanged(int)), this, SLOT(updatedLayer(int)));
     connect(ui->horizontalSlider_threshold, SIGNAL(valueChanged(int)), this, SLOT(updatedThreshold(int)));
-    connect(ui->pushButton_depthBuffer, SIGNAL(clicked()), this, SLOT(onDepthBufferClicked()));
+    connect(ui->pushButton_render3d, SIGNAL(clicked()), this, SLOT(onDepthBufferClicked()));
 }
 
 Widget::~Widget()
@@ -163,17 +164,20 @@ void Widget::load_3d(){
 }
 
 //---------------------------------------------------------------------------------------------------------
-//---------------------------------------------- Aufgabe 4.2 ----------------------------------------------
+//---------------------------------------------- Aufgabe 4 ----------------------------------------------
 //---------------------------------------------------------------------------------------------------------
 
 void Widget::onDepthBufferClicked(){
-    int threshold = ui->horizontalSlider_threshold->value();
-    calculateDepthBuffer(m_pImageData3d, 512, 512, 130, threshold, m_ptiefenkarte);
-    QImage image(512, 512, QImage::Format_RGB32);
 
+    int threshold = ui->horizontalSlider_threshold->value();
+
+    calculateDepthBuffer(m_pImageData3d, 512, 512, 130, threshold, m_pDepthMap);
+    renderDepthBuffer(m_pDepthMap, 512, 512, m_pDepthMap_diffuse);
+
+    QImage image(512, 512, QImage::Format_RGB32);
     for(int j = 0; j < 512; j++){
         for(int i = 0; i < 512; i++){
-            int grey = (int)((m_ptiefenkarte[j * 512 + i] / 129.0) * 255.0);
+            int grey = (int)((m_pDepthMap_diffuse[j * 512 + i]));
             grey = qBound(0, grey, 255);
             image.setPixel(i, j, qRgb(grey, grey, grey));
         }
@@ -193,6 +197,26 @@ int Widget::calculateDepthBuffer(short* inputData, int width, int height, int la
                     break;
                 }
             }
+        }
+    }
+    return 0;
+}
+
+int Widget::renderDepthBuffer(const short* depthBuffer, int width, int height, short* shadedBuffer){
+    for (int j = 1; j < height-1; j++) {
+        for (int i = 1; i < width-1; i++) {
+            shadedBuffer[j * width + i] = 0;
+
+            int left_neighbour = depthBuffer[j*width + i-1];
+            int right_neighbour = depthBuffer[j*width + i+1];
+            int upper_neighbour = depthBuffer[(j-1)*width + i];
+            int lower_neighbour = depthBuffer[(j+1)*width + i];
+            int Tx = left_neighbour - right_neighbour;
+            int Ty = upper_neighbour - lower_neighbour;
+
+            int divisor = (2*Tx)*(2*Tx) + (2*Ty)*(2*Ty) + 16;
+            if(divisor <= 0) shadedBuffer[j*width + i] = 0;
+            else shadedBuffer[j*width + i] = 255*(4/sqrt(divisor));
         }
     }
     return 0;
